@@ -1,7 +1,5 @@
 # Moanhermes
-
+A simple messenger server.
 
 **Sample Edit**
-
-
-A simple messenger server.
+Must edit this afterwards. Alright. :D
