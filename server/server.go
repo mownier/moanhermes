@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"encoding/json"
+	"crypto/sha1"
+	"encoding/base64"
 )
 
 type User struct {
@@ -24,9 +26,14 @@ type Room struct {
 }
 
 func NewRoom(name string, creator *User) *Room {
+	hasher := sha1.New()
+	hasher.Write([]byte(name))
+	uid := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 	users := make([]*User, 0)
 	users = append(users, creator)
+
 	return &Room {
+		Uid: uid,
 		Name: name,
 		Users: users,
 	}
