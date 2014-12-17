@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	username string
+	Username string
 }
 
 func NewUser(username string) *User {
@@ -17,9 +17,9 @@ func NewUser(username string) *User {
 }
 
 type Room struct {
-	uid string
-	name string
-	users []*User
+	Uid string
+	Name strings
+	Users []*User
 }
 
 func NewRoom(name string, creator *User) *Room {
@@ -31,11 +31,13 @@ func NewRoom(name string, creator *User) *Room {
 	}
 }
 
+var rooms = make([]*Room, 0)
+
 type Moanhermes struct {
-	rooms []*Room
+
 }
 
-func (m *Moanhermes) broadcastMessage(message, roomUid string) {
+func broadcastMessage(message, roomUid string) {
 
 }
 
@@ -56,7 +58,8 @@ func (m *Moanhermes) StartServing(address string) {
 // HTTP Handlers
 
 func createRoomHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r)
+	rooms = append(rooms, NewRoom("room-name", NewUser("mownier")))
+	fmt.Println(rooms[0].)
 }
 
 func joinRoomHandler(w http.ResponseWriter, r *http.Request) {
@@ -97,6 +100,5 @@ func signoutHandler(w http.ResponseWriter, r *http.Request) {
 
 func NewMoanhermes() *Moanhermes {
 	return &Moanhermes {
-		rooms: make([]*Room, 0),
 	}
 }
