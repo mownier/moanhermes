@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-	moanhermes := server.NewMoanhermes()
-	moanhermes.StartServing("")
+	m := server.NewMoanhermes()
+	m.StartServing(":8080")
 }
