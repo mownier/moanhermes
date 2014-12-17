@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"fmt"
 	"log"
 	"encoding/json"
 	"crypto/sha1"
@@ -79,8 +78,6 @@ func createRoomHandler() http.HandlerFunc {
 			var jsonString []byte = []byte("{\"message\" : \"Method not allowed.\"}")
 			// Writing the json response
 			w.Write(jsonString)
-			// Writing in the command line
-			fmt.Println(string(jsonString))
 		} else {
 			// TODO Parse parameters: room_name, username
 			// Getting the room name from the form values
@@ -103,8 +100,6 @@ func createRoomHandler() http.HandlerFunc {
 				var jsonString []byte = []byte("{\"message\" : \"Successfully created a room.\"}")
 				// Writing the json response
 				w.Write(jsonString)
-				// Writing in the command line
-				fmt.Println(string(jsonString))
 			} else {
 				// Creating a map for errors
 				errors := make(map[string]interface{})
@@ -124,8 +119,6 @@ func createRoomHandler() http.HandlerFunc {
 				w.WriteHeader(http.StatusBadRequest)
 				// Writing the json response
 				w.Write(jsonString)
-				// Writing in the command line
-				fmt.Println(string(jsonString))
 			}
 		}
 	})
