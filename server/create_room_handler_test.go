@@ -128,3 +128,21 @@ func TestCreateRoomHandlerInvalidMethodResponseMessage(t *testing.T) {
 		t.Error("There's no invalid method reponse message.")
 	}
 }
+
+func TestCreateRoomHandlerInvalidMethodStatusCode(t *testing.T) {
+	// Creating the handler function for the create rrom handler
+	createRoomHandler := createRoomHandler()
+	// Creating parameter values for the request
+	params := url.Values{}
+	// Creating an http request
+	// GET, PUT, DELETE 
+	request, _ := http.NewRequest("GET", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Creating a response recorder
+	w := httptest.NewRecorder()
+	// Serving the http request and the response recorder
+	createRoomHandler.ServeHTTP(w, request)
+	// Checking the method not allowed status
+	if (w.Code != http.StatusMethodNotAllowed) {
+		t.Error("Status code is not http.StatusMethodNotAllowed.")
+	}
+}
