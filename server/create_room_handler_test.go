@@ -198,3 +198,31 @@ func TestCreateRoomHandlerResponseJsonContentType(t *testing.T) {
 		t.Error("Content-Type of the response's header is not 'application/json'.")
 	}
 }
+
+func TestCreateRoomHandlerResponseSuccessfulMessage(t *testing.T) {
+	// Creating the handler function for the create room handler
+	createRoomHandler := createRoomHandler()
+	// Creating parameter values for the request
+	params := url.Values{}
+	// Adding a username parameter
+	params.Add("username", "mownier")
+	// Adding a room name parameter
+	params.Add("room_name", "room123")
+	// Creating an http request
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
+	// Creating a response recorder
+	w := httptest.NewRecorder()
+	// Serving the http request and the response recorder
+	createRoomHandler.ServeHTTP(w, request)
+	// Declaring a container for the response
+	var response interface{}
+	// Converting json to response container
+	json.Unmarshal(w.Body.Bytes(), &response)
+	// Typecasting the response container to map
+	r := response.(map[string]interface{})
+	// Checking if the room_name key exist in the response
+	if _, ok := r["message"]; !ok {
+		t.Error("There's no sucessful message.")
+	}
+}
