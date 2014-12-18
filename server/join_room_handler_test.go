@@ -100,7 +100,7 @@ func TestJoinRoomHandlerShouldRespondWithErroMessageIfRequestMethodIsNotPOST(t *
 func TestJoinRoomHandlerResponseContentType(t *testing.T) {
 	joinRoomHandler := joinRoomHandler()
 	params := url.Values{}
-	request, _ := http.NewRequest("POST", "localhost:8080/chat/room", bytes.NewBufferString(params.Encode()))
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/join", bytes.NewBufferString(params.Encode()))
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	w := httptest.NewRecorder()
 	joinRoomHandler.ServeHTTP(w, request)
@@ -114,7 +114,7 @@ func TestJoinRoomHandlerStatusCodeIfRoomNotFound(t *testing.T) {
 	params := url.Values{}
 	params.Add("room_id", "123123")
 	params.Add("username", "mownier")
-	request, _ := http.NewRequest("POST", "localhost:8080/chat/room", bytes.NewBufferString(params.Encode()))
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/join", bytes.NewBufferString(params.Encode()))
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	w := httptest.NewRecorder()
 	joinRoomHandler.ServeHTTP(w, request)
@@ -128,7 +128,7 @@ func TestJoinRoomHandlerResponseMessageIfRoomNotFound(t *testing.T) {
 	params := url.Values{}
 	params.Add("room_id", "123123")
 	params.Add("username", "mownier")
-	request, _ := http.NewRequest("POST", "localhost:8080/chat/room", bytes.NewBufferString(params.Encode()))
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/join", bytes.NewBufferString(params.Encode()))
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	w := httptest.NewRecorder()
 	joinRoomHandler.ServeHTTP(w, request)
@@ -151,7 +151,7 @@ func TestJoinRoomHandlerUserAlreadyJoinedTriesToJoinAgain(t *testing.T) {
 	params := url.Values{}
 	params.Add("room_id", room.Uid)
 	params.Add("username", creator.Username)
-	request, _ := http.NewRequest("POST", "localhost:8080/chat/room", bytes.NewBufferString(params.Encode()))
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/join", bytes.NewBufferString(params.Encode()))
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	w := httptest.NewRecorder()
 	joinRoomHandler.ServeHTTP(w, request)
@@ -164,5 +164,35 @@ func TestJoinRoomHandlerUserAlreadyJoinedTriesToJoinAgain(t *testing.T) {
 		t.Error("There's no message key in the response")
 	} else if r["message"] != "Already joined." {
 		t.Error("Error message should be 'Already joined.'")
+	}
+}
+
+func TestJoinRoomHandlerUserSuccessfullyJoined(t *testing.T) {
+	creator := NewUser("mownier")
+	room := NewRoom("room123", creator)
+	rooms = append(rooms, room)
+
+	joinRoomHandler := joinRoomHandler()
+	params := url.Values{}
+	params.Add("room_id", room.Uid)
+	params.Add("username", "juan")
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/join", bytes.NewBufferString(params.Encode()))
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
+	w := httptest.NewRecorder()
+	joinRoomHandler.ServeHTTP(w, request)
+	var response interface{}
+	json.Unmarshal(w.Body.Bytes(), &response)
+	r := response.(map[string]interface{})
+
+	var newJoinedUser *User = room.Users[len(room.Users) - 1]
+
+	if newJoinedUser.Username != "juan" {
+		t.Error("Newly joined user's username is not 'juan'.")
+	} else if w.Code != http.StatusOK {
+		t.Error("Status code shoulde be http.StatusOK.")
+	} else if _, ok := r["message"]; !ok {
+		t.Error("There's no message key in the response.")
+	} else if r["message"] != "Successfully joined." {
+		t.Error("Error message should be 'Sucessfully joined.'")
 	}
 }
