@@ -18,6 +18,8 @@ func TestCreateRoomHandlerUsernameErrorMessageWithEmptyParamValue(t *testing.T) 
 	params.Add("username", "")
 	// Creating an http request
 	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Setting the request header content type
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	// Creating a response recorder
 	w := httptest.NewRecorder()
 	// Serving the http request and the response recorder
@@ -41,6 +43,8 @@ func TestCreateRoomHandlerUsernameErrorMessageNotSetAsParameter(t *testing.T) {
 	params := url.Values{}
 	// Creating an http request
 	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Setting the request header content type
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	// Creating a response recorder
 	w := httptest.NewRecorder()
 	// Serving the http request and the response recorder
@@ -64,6 +68,8 @@ func TestCreateRoomHandlerUsernameErrorStatusCode(t *testing.T) {
 	params := url.Values{}
 	// Creating an http request
 	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Setting the request header content type
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	// Creating a response recorder
 	w := httptest.NewRecorder()
 	// Serving the http request and the response recorder
@@ -83,6 +89,8 @@ func TestCreateRoomHandlerRoomNameErrorMessageWithEmptyParamValue(t *testing.T) 
 	params.Add("username", "")
 	// Creating an http request
 	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Setting the request header content type
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	// Creating a response recorder
 	w := httptest.NewRecorder()
 	// Serving the http request and the response recorder
@@ -106,6 +114,8 @@ func TestCreateRoomHandlerRoomNameErrorMessageNotSetAsParameter(t *testing.T) {
 	params := url.Values{}
 	// Creating an http request
 	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Setting the request header content type
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	// Creating a response recorder
 	w := httptest.NewRecorder()
 	// Serving the http request and the response recorder
@@ -129,6 +139,8 @@ func TestCreateRoomHandlerRoomNameErrorStatusCode(t *testing.T) {
 	params := url.Values{}
 	// Creating an http request
 	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Setting the request header content type
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	// Creating a response recorder
 	w := httptest.NewRecorder()
 	// Serving the http request and the response recorder
@@ -147,6 +159,8 @@ func TestCreateRoomHandlerInvalidMethodResponseMessage(t *testing.T) {
 	// Creating an http request
 	// GET, PUT, DELETE 
 	request, _ := http.NewRequest("GET", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Setting the request header content type
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	// Creating a response recorder
 	w := httptest.NewRecorder()
 	// Serving the http request and the response recorder
@@ -171,6 +185,8 @@ func TestCreateRoomHandlerInvalidMethodStatusCode(t *testing.T) {
 	// Creating an http request
 	// GET, PUT, DELETE 
 	request, _ := http.NewRequest("GET", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Setting the request header content type
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	// Creating a response recorder
 	w := httptest.NewRecorder()
 	// Serving the http request and the response recorder
@@ -189,6 +205,8 @@ func TestCreateRoomHandlerResponseJsonContentType(t *testing.T) {
 	// Creating an http request
 	// POST, GET, PUT, DELETE
 	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Setting the request header content type
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	// Creating a response recorder
 	w := httptest.NewRecorder()
 	// Serving the http request and the response recorder
@@ -210,6 +228,7 @@ func TestCreateRoomHandlerResponseSuccessfulMessage(t *testing.T) {
 	params.Add("room_name", "room123")
 	// Creating an http request
 	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Setting the request header content type
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	// Creating a response recorder
 	w := httptest.NewRecorder()
