@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"bytes"
 	"encoding/json"
+	// "fmt"
 )
 
 func TestCreateRoomHandlerUsernameErrorMessageWithEmptyParamValue(t *testing.T) {
@@ -257,3 +258,48 @@ func TestCreateRoomHandlerResponseSuccessfulMessage(t *testing.T) {
 		t.Error("Successful message should be 'Successfully created a room.'")
 	}
 }
+
+func TestCreateRoomHandlerSuccessfullyAddedWithStatusCode(t *testing.T) {
+
+}
+
+func TestCreateRoomHandlerSuccessfullyAddedToArrayOfRooms(t *testing.T) {
+	// Getting the number of rooms before room creation
+	var numberOfRoomsBeforeRoomCreation int = len(rooms)
+	// Creating the handler function for the create room handler
+	createRoomHandler := createRoomHandler()
+	// Creating parameter values for the request
+	params := url.Values{}
+	// Adding a username parameter
+	params.Add("username", "mownier")
+	// Adding a room name parameter
+	params.Add("room_name", "room123")
+	// Creating an http request
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Setting the request header content type
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
+	// Creating a response recorder
+	w := httptest.NewRecorder()
+	// Serving the http request and the response recorder
+	createRoomHandler.ServeHTTP(w, request)
+	// Getting the number of rooms after room creation
+	var numberOfRoomsAfterRoomCreation int = len(rooms)
+	// Checking if the number of rows is incremented by 1
+	if numberOfRoomsBeforeRoomCreation + 1 != numberOfRoomsAfterRoomCreation {
+		t.Errorf("New room is not successfully added to array 'rooms'. Before: %d, After: %d\n", numberOfRoomsBeforeRoomCreation, numberOfRoomsAfterRoomCreation)
+	}
+}
+
+func TestCreateRoomHandlerSuccessfullyAddedWithMatchingUsername(t *testing.T) {
+
+}
+
+func TestCreateRoomHandlerSuccessfullyAddedWithMatchingRoomName(t *testing.T) {
+
+}
+
+func TestCreateRoomHandlerSuccessfullyAddedWithGeneratedRoomUid(t *testing.T) {
+
+}
+
+
