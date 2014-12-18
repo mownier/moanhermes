@@ -33,6 +33,8 @@ func TestCreateRoomHandlerUsernameErrorMessageWithEmptyParamValue(t *testing.T) 
 	// Checking if the username key exist in the response
 	if _, ok := r["username"]; !ok {
 		t.Error("There's no username error message.")
+	} else if r["username"] != "Username is required." {
+		t.Error("Username error message should be 'Username is required.'")
 	}
 }
 
@@ -58,6 +60,8 @@ func TestCreateRoomHandlerUsernameErrorMessageNotSetAsParameter(t *testing.T) {
 	// Checking if the username key exist in the response
 	if _, ok := r["username"]; !ok {
 		t.Error("There's no username error message.")
+	} else if r["username"] != "Username is required." {
+		t.Error("Username error message should be 'Username is required.'")
 	}
 }
 
@@ -104,6 +108,8 @@ func TestCreateRoomHandlerRoomNameErrorMessageWithEmptyParamValue(t *testing.T) 
 	// Checking if the room_name key exist in the response
 	if _, ok := r["room_name"]; !ok {
 		t.Error("There's no room_name error message.")
+	} else if r["room_name"] != "Room name is required." {
+		t.Error("Room name error message should be 'Room name is required.'")
 	}
 }
 
@@ -129,6 +135,8 @@ func TestCreateRoomHandlerRoomNameErrorMessageNotSetAsParameter(t *testing.T) {
 	// Checking if the room_name key exist in the response
 	if _, ok := r["room_name"]; !ok {
 		t.Error("There's no room name error message.")
+	} else if r["room_name"] != "Room name is required." {
+		t.Error("Room name error message should be 'Room name is required.'")
 	}
 }
 
@@ -174,6 +182,8 @@ func TestCreateRoomHandlerInvalidMethodResponseMessage(t *testing.T) {
 	// Checking if message key exist in the response
 	if _, ok := r["message"]; !ok {
 		t.Error("There's no invalid method reponse message.")
+	} else if r["message"] != "Method not allowed." {
+		t.Error("Invalid method error message should be 'Method not allowed.'")
 	}
 }
 
@@ -243,5 +253,7 @@ func TestCreateRoomHandlerResponseSuccessfulMessage(t *testing.T) {
 	// Checking if the room_name key exist in the response
 	if _, ok := r["message"]; !ok {
 		t.Error("There's no sucessful message.")
+	} else if r["message"] != "Successfully created a room." {
+		t.Error("Successful message should be 'Successfully created a room.'")
 	}
 }
