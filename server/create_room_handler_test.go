@@ -57,6 +57,23 @@ func TestCreateRoomHandlerUsernameErrorMessageNotSetAsParameter(t *testing.T) {
 	}
 }
 
+func TestCreateRoomHandlerUsernameErrorStatusCode(t *testing.T) {
+	// Creating the handler function for the create room handler
+	createRoomHandler := createRoomHandler()
+	// Creating parameter values for the request
+	params := url.Values{}
+	// Creating an http request
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Creating a response recorder
+	w := httptest.NewRecorder()
+	// Serving the http request and the response recorder
+	createRoomHandler.ServeHTTP(w, request)
+	// Checking the response status code
+	if w.Code != http.StatusBadRequest {
+		t.Error("Username error reponse status code is not http.StatusBadRequest")
+	}
+}
+
 func TestCreateRoomHandlerRoomNameErrorMessageWithEmptyParamValue(t *testing.T) {
 	// Creating the handler function for the create room handler
 	createRoomHandler := createRoomHandler()
