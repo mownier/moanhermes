@@ -180,3 +180,21 @@ func TestCreateRoomHandlerInvalidMethodStatusCode(t *testing.T) {
 		t.Error("Status code is not http.StatusMethodNotAllowed.")
 	}
 }
+
+func TestCreateRoomHandlerResponseJsonContentType(t *testing.T) {
+	// Creating the handler function for the create room handler
+	createRoomHandler := createRoomHandler()
+	// Creating parameter values for the request
+	params := url.Values{}
+	// Creating an http request
+	// POST, GET, PUT, DELETE
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Creating a response recorder
+	w := httptest.NewRecorder()
+	// Serving the http request and the response recorder
+	createRoomHandler.ServeHTTP(w, request)
+	// Checking the header's content type
+	if w.Header().Get("Content-Type") != "application/json" {
+		t.Error("Content-Type of the response's header is not 'application/json'.")
+	}
+}
