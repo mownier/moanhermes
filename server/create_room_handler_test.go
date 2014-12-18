@@ -310,7 +310,32 @@ func TestCreateRoomHandlerSuccessfullyAddedToArrayOfRooms(t *testing.T) {
 }
 
 func TestCreateRoomHandlerSuccessfullyAddedWithCreator(t *testing.T) {
-
+	// Creating the handler function for the create room handler
+	createRoomHandler := createRoomHandler()
+	// Creating parameter values for the request
+	params := url.Values{}
+	// Adding a username parameter
+	params.Add("username", "mownier")
+	// Adding a room name parameter
+	params.Add("room_name", "room123")
+	// Creating an http request
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Setting the request header content type
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
+	// Creating a response recorder
+	w := httptest.NewRecorder()
+	// Serving the http request and the response recorder
+	createRoomHandler.ServeHTTP(w, request)
+	// Getting the number of rooms after room creation
+	var numberOfRooms int = len(rooms)
+	// Getting the newly added room
+	var room *Room = rooms[numberOfRooms - 1]
+	// Checking the users of the new ly added room
+	if len(room.Users) > 1 {
+		t.Error("There should be only one creator.")
+	} else if len(room.Users) == 0 {
+		t.Error("There is no creator.")
+	}
 }
 
 func TestCreateRoomHandlerSuccessfullyAddedWithMatchingCreatorUsername(t *testing.T) {
