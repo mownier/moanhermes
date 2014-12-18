@@ -108,3 +108,36 @@ func TestJoinRoomHandlerResponseContentType(t *testing.T) {
 		t.Error("Content-Type of the response should be 'application/json'.")
 	}
 }
+
+func TestJoinRoomHandlerStatusCodeIfRoomNotFound(t *testing.T) {
+	joinRoomHandler := joinRoomHandler()
+	params := url.Values{}
+	params.Add("room_id", "123123")
+	params.Add("username", "mownier")
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room", bytes.NewBufferString(params.Encode()))
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
+	w := httptest.NewRecorder()
+	joinRoomHandler.ServeHTTP(w, request)
+	if w.Code != http.StatusNotFound {
+		t.Error("Status code should http.StatusNotFound.")
+	}
+}
+
+func TestJoinRoomHandlerResponseMessageIfRoomNotFound(t *testing.T) {
+	joinRoomHandler := joinRoomHandler()
+	params := url.Values{}
+	params.Add("room_id", "123123")
+	params.Add("username", "mownier")
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room", bytes.NewBufferString(params.Encode()))
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
+	w := httptest.NewRecorder()
+	joinRoomHandler.ServeHTTP(w, request)
+	var response interface{}
+	json.Unmarshal(w.Body.Bytes(), &response)
+	r := response.(map[string]interface{})
+	if _, ok := r["message"]; !ok {
+		t.Error("There's no message key in the response.")
+	} else if r["message"] != "Room not found." {
+		t.Error("Message should be 'Room not found.'")
+	}
+}
