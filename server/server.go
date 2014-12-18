@@ -157,7 +157,10 @@ func joinRoomHandler() http.HandlerFunc {
 						responseStatusCode = http.StatusBadRequest
 						responseString = []byte("{\"message\" : \"Already joined.\"}")
 					} else {
-
+						var user *User = NewUser(username)
+						room.Users = append(room.Users, user)
+						responseStatusCode = http.StatusOK
+						responseString = []byte("{\"message\" : \"Successfully joined.\"}")
 					}
 				}
 			} else {
