@@ -141,3 +141,28 @@ func TestJoinRoomHandlerResponseMessageIfRoomNotFound(t *testing.T) {
 		t.Error("Message should be 'Room not found.'")
 	}
 }
+
+func TestJoinRoomHandlerUserAlreadyJoinedTriesToJoinAgain(t *testing.T) {
+	creator := NewUser("mownier")
+	room := NewRoom("room123", creator)
+	rooms = append(rooms, room)
+
+	joinRoomHandler := joinRoomHandler()
+	params := url.Values{}
+	params.Add("room_id", room.Uid)
+	params.Add("username", creator.Username)
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room", bytes.NewBufferString(params.Encode()))
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
+	w := httptest.NewRecorder()
+	joinRoomHandler.ServeHTTP(w, request)
+	var response interface{}
+	json.Unmarshal(w.Body.Bytes(), &response)
+	r := response.(map[string]interface{})
+	if w.Code != http.StatusBadRequest {
+		t.Error("Status code shoulde be http.StatusBadRequest")
+	} else if _, ok := r["message"]; !ok {
+		t.Error("There's no message key in the response")
+	} else if r["message"] != "Already joined." {
+		t.Error("Error message should be 'Already joined.'")
+	}
+}
