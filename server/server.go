@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"fmt"
 	"log"
 	"encoding/json"
 	"crypto/sha1"
@@ -50,7 +49,7 @@ func broadcastMessage(message, roomUid string) {
 }
 
 func (m *Moanhermes) StartServing(address string) {
-	http.HandleFunc("/chat/room/create"     , createRoomHandler)
+	http.HandleFunc("/chat/room/create"     , createRoomHandler())
 	http.HandleFunc("/chat/room/join"       , joinRoomHandler)
 	http.HandleFunc("/chat/room/leave"      , leaveRoomHandler)
 	http.HandleFunc("/chat/room/invite"     , inviteRoomHandler)
@@ -67,64 +66,60 @@ func (m *Moanhermes) StartServing(address string) {
 
 // METHOD: POST
 // PARAMS: room_name, username
-func createRoomHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		// TODO Method not found
+func createRoomHandler() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		var responseString []byte
+		var responseStatusCode int
+
+		if r.Method != "POST" {
+			// Setting method not allowed status
+			responseStatusCode = http.StatusMethodNotAllowed
+			// Setting the response string
+			responseString = []byte("{\"message\" : \"Method not allowed.\"}")
+		} else {
+			// Getting the room name from the form values
+			var roomName string = r.FormValue("room_name")
+			// Getting the username from the form values
+			var username string = r.FormValue("username")
+			// Checking if room name parameter does exist
+			var hasRoomName bool = len(roomName) > 0
+			// Checking if username parameter does exist 
+			var hasUsername bool = len(username) > 0
+
+			if hasRoomName && hasUsername {
+				// Appending a new room
+				rooms = append(rooms, NewRoom(roomName, NewUser(username)))
+				// Setting the response status code
+				responseStatusCode = http.StatusOK
+				// Setting the response string
+				responseString = []byte("{\"message\" : \"Successfully created a room.\"}")
+			} else {
+				// Creating a map for errors
+				errors := make(map[string]interface{})
+				// For non-existent room name value
+				if !hasRoomName {
+					errors["room_name"] = "Room name is required."
+				} 
+				// For non-existent username value
+				if !hasUsername {
+					errors["username"] = "Username is required."
+				}
+				// Coverting map to json string 
+				jsonString, _ := json.Marshal(errors)
+				// Setting the status code
+				responseStatusCode = http.StatusBadRequest
+				// Setting the response string
+				responseString = jsonString
+			}
+		}
 		// Setting the response as json format
 		w.Header().Set("Content-Type", "application/json")
 		// Returning as 405 Method Not Allowed
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		// Creating a json string
-		var jsonString []byte = []byte("{\"message\" : \"Method not allowed.\"}")
-		// Writing the json response
-		w.Write(jsonString)
-		// Writing in the command line
-		fmt.Println(string(jsonString))
-	} else {
-		// TODO Parse parameters: room_name, username
-		// Getting the room name from the form values
-		var roomName string = r.FormValue("room_name")
-		// Getting the username from the form values
-		var username string = r.FormValue("username")
-		// Checking if room name parameter does exist
-		var hasRoomName bool = len(roomName) > 0
-		// Checking if username parameter does exist 
-		var hasUsername bool = len(username) > 0
-
-		if hasRoomName && hasUsername {
-			// Appending a new room
-			rooms = append(rooms, NewRoom(roomName, NewUser(username)))
-			// Setting the response as json format
-			w.Header().Set("Content-Type", "application/json")
-			// Return as 200 OK
-			w.WriteHeader(http.StatusOK)
-			// Creating a json string
-			var jsonString []byte = []byte("{\"message\" : \"Successfully created a room.\"}")
-			// Writing the json response
-			w.Write(jsonString)
-			// Writing in the command line
-			fmt.Println(string(jsonString))
-		} else {
-			// Creating a map for errors
-			errors := make(map[string]string)
-			// For non-existent room name value
-			if !hasRoomName {
-				errors["room_name"] = "Room name is required."
-			} 
-			// For non-existent username value
-			if !hasUsername {
-				errors["username"] = "Username is required."
-			}
-			// Coverting map to json stirng 
-			jsonString, _ := json.Marshal(errors)
-			// Setting the response as json format
-			w.Header().Set("Content-Type", "application/json")
-			// Writing the json response
-			w.Write(jsonString)
-			// Writing in the command line
-			fmt.Println(string(jsonString))
-		}
-	}
+		w.WriteHeader(responseStatusCode)
+		// Writing the  json response
+		w.Write(responseString)
+	})
 }
 
 func joinRoomHandler(w http.ResponseWriter, r *http.Request) {
