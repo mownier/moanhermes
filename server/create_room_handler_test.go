@@ -104,3 +104,27 @@ func TestCreateRoomHandlerRoomNameErrorMessageNotSetAsParameter(t *testing.T) {
 		t.Error("There's no room name error message.")
 	}
 }
+
+func TestCreateRoomHandlerInvalidMethodResponseMessage(t *testing.T) {
+	// Creating the handler function for the create rrom handler
+	createRoomHandler := createRoomHandler()
+	// Creating parameter values for the request
+	params := url.Values{}
+	// Creating an http request
+	// GET, PUT, DELETE 
+	request, _ := http.NewRequest("GET", "localhost:8080/chat/room/create", bytes.NewBufferString(params.Encode()))
+	// Creating a response recorder
+	w := httptest.NewRecorder()
+	// Serving the http request and the response recorder
+	createRoomHandler.ServeHTTP(w, request)
+	// Declaring a container for the response
+	var response interface{}
+	// Converting json to response container
+	json.Unmarshal(w.Body.Bytes(), &response)
+	// Typecasting the response container to map
+	r := response.(map[string]interface{})
+	// Checking if message key exist in the response
+	if _, ok := r["message"]; !ok {
+		t.Error("There's no invalid method reponse message.")
+	}
+}
