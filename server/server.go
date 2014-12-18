@@ -139,9 +139,11 @@ func joinRoomHandler() http.HandlerFunc {
 
 			if hasRoomId && hasUsername {
 				var roomDoesExist bool = false
+				var room *Room
 				for i := 0; i < len(rooms); i++ {
-					var room *Room = rooms[i]
-					if room.Uid == roomId {
+					var r *Room = rooms[i]
+					if r.Uid == roomId {
+						room = r
 						roomDoesExist = true
 						break;
 					}
@@ -150,7 +152,13 @@ func joinRoomHandler() http.HandlerFunc {
 					responseStatusCode = http.StatusNotFound
 					responseString = []byte("{\"message\" : \"Room not found.\"}")
 				} else {
-					
+					var creator *User = room.Users[0]
+					if creator.Username == username {
+						responseStatusCode = http.StatusBadRequest
+						responseString = []byte("{\"message\" : \"Already joined.\"}")
+					} else {
+
+					}
 				}
 			} else {
 				errors := make(map[string]interface{})
