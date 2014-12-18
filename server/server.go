@@ -136,9 +136,22 @@ func joinRoomHandler() http.HandlerFunc {
 			var username string = r.FormValue("username")
 			var hasRoomId bool = len(roomId) > 0
 			var hasUsername bool = len(username) > 0
-			
-			if hasRoomId && hasUsername {
 
+			if hasRoomId && hasUsername {
+				var roomDoesExist bool = false
+				for i := 0; i < len(rooms); i++ {
+					var room *Room = rooms[i]
+					if room.Uid == roomId {
+						roomDoesExist = true
+						break;
+					}
+				}
+				if roomDoesExist {
+
+				} else {
+					responseStatusCode = http.StatusNotFound
+					responseString = []byte("{\"message\" : \"Room not found.\"}")
+				}
 			} else {
 				errors := make(map[string]interface{})
 				if !hasRoomId {
