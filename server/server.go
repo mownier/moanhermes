@@ -68,16 +68,15 @@ func (m *Moanhermes) StartServing(address string) {
 // PARAMS: room_name, username
 func createRoomHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		var responseString []byte
+		var responseStatusCode int
+
 		if r.Method != "POST" {
-			// TODO Method not found
-			// Setting the response as json format
-			w.Header().Set("Content-Type", "application/json")
-			// Returning as 405 Method Not Allowed
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			// Creating a json string
-			var jsonString []byte = []byte("{\"message\" : \"Method not allowed.\"}")
-			// Writing the json response
-			w.Write(jsonString)
+			// Setting method not allowed status
+			responseStatusCode = http.StatusMethodNotAllowed
+			// Setting the response string
+			responseString = []byte("{\"message\" : \"Method not allowed.\"}")
 		} else {
 			// TODO Parse parameters: room_name, username
 			// Getting the room name from the form values
@@ -92,14 +91,10 @@ func createRoomHandler() http.HandlerFunc {
 			if hasRoomName && hasUsername {
 				// Appending a new room
 				rooms = append(rooms, NewRoom(roomName, NewUser(username)))
-				// Setting the response as json format
-				w.Header().Set("Content-Type", "application/json")
-				// Return as 200 OK
-				w.WriteHeader(http.StatusOK)
-				// Creating a json string
-				var jsonString []byte = []byte("{\"message\" : \"Successfully created a room.\"}")
-				// Writing the json response
-				w.Write(jsonString)
+				// Setting the response status code
+				responseStatusCode = http.StatusOK
+				// Setting the response string
+				responseString = []byte("{\"message\" : \"Successfully created a room.\"}")
 			} else {
 				// Creating a map for errors
 				errors := make(map[string]interface{})
@@ -111,16 +106,20 @@ func createRoomHandler() http.HandlerFunc {
 				if !hasUsername {
 					errors["username"] = "Username is required."
 				}
-				// Coverting map to json stirng 
+				// Coverting map to json string 
 				jsonString, _ := json.Marshal(errors)
-				// Setting the response as json format
-				w.Header().Set("Content-Type", "application/json")
-				// Returning as 405 Method Not Allowed
-				w.WriteHeader(http.StatusBadRequest)
-				// Writing the json response
-				w.Write(jsonString)
+				// Setting the status code
+				responseStatusCode = http.StatusBadRequest
+				// Setting the response string
+				responseString = jsonString
 			}
 		}
+		// Setting the response as json format
+		w.Header().Set("Content-Type", "application/json")
+		// Returning as 405 Method Not Allowed
+		w.WriteHeader(responseStatusCode)
+		// Writing the  json response
+		w.Write(responseString)
 	})
 }
 
