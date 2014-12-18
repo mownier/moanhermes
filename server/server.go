@@ -78,7 +78,6 @@ func createRoomHandler() http.HandlerFunc {
 			// Setting the response string
 			responseString = []byte("{\"message\" : \"Method not allowed.\"}")
 		} else {
-			// TODO Parse parameters: room_name, username
 			// Getting the room name from the form values
 			var roomName string = r.FormValue("room_name")
 			// Getting the username from the form values
