@@ -82,3 +82,45 @@ func TestLeaveRoomHandlerEmptyRoomIdParameterValue(t *testing.T) {
 		t.Error("Error message should be 'Room id is required.'")
 	}
 }
+
+func TestLeaveRoomHandlerRoomIdNotSetAsParameter(t *testing.T) {
+	leaveRoomHandler := leaveRoomHandler()
+	params := url.Values{}
+	request, _ := http.NewRequest("DELETE", "localhost:8080/chat/room/leave", bytes.NewBufferString(params.Encode()))
+	request.Header.Set("Content-Type", "application/x-www-urlencoded; param=value")
+	w := httptest.NewRecorder()
+	leaveRoomHandler.ServeHTTP(w, request)
+
+	var response interface{}
+	json.Unmarshal(w.Body.Bytes(), &response)
+	r := response.(map[string]interface{})
+
+	if w.Code != http.StatusBadRequest {
+		t.Error("Status code should be http.StatusBadRequest.")
+	} else if _, ok := r["room_id"]; !ok {
+		t.Error("There is no message key.")
+	} else if r["room_id"] != "Room id is required." {
+		t.Error("Error message should be 'Room id is required.'")
+	}
+}
+
+func TestLeaveRoomHandlerUsernameNotSetAsParameter(t *testing.T) {
+	leaveRoomHandler := leaveRoomHandler()
+	params := url.Values{}
+	request, _ := http.NewRequest("DELETE", "localhost:8080/chat/room/leave", bytes.NewBufferString(params.Encode()))
+	request.Header.Set("Content-Type", "application/x-www-urlencoded; param=value")
+	w := httptest.NewRecorder()
+	leaveRoomHandler.ServeHTTP(w, request)
+
+	var response interface{}
+	json.Unmarshal(w.Body.Bytes(), &response)
+	r := response.(map[string]interface{})
+
+	if w.Code != http.StatusBadRequest {
+		t.Error("Status code should be http.StatusBadRequest.")
+	} else if _, ok := r["username"]; !ok {
+		t.Error("There is no message key.")
+	} else if r["username"] != "Username is required." {
+		t.Error("Error message should be 'Username is required.'")
+	}
+}
