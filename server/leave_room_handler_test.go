@@ -172,6 +172,44 @@ func TestLeaveRoomHandlerIfUserIsTheCreator(t *testing.T) {
 	}
 }
 
+func TestLeaveRoomHandlerIfMemberWantsToLeave(t *testing.T) {
+	var creator *User = NewUser("mownier")
+	var member *User = NewUser("juan")
+	var room *Room = NewRoom("room123", creator)
+	room.Users = append(room.Users, member)
+	rooms = append(rooms, room)
+	var numberOfUsersBeforeSomeoneLeft int = len(room.Users)
+
+	leaveRoomHandler := leaveRoomHandler()
+	request, _ := http.NewRequest("DELETE", "localhost:8080/chat/room/leave?username=juan&room_id=" + room.Uid, nil)
+	w := httptest.NewRecorder()
+	leaveRoomHandler.ServeHTTP(w, request)
+	var response interface{}
+	json.Unmarshal(w.Body.Bytes(), &response)
+	r := response.(map[string]interface{})
+
+	var involvedRoom *Room
+	for i := 0; i < len(rooms); i++ {
+		var r *Room = rooms[i]
+		if r.Uid == room.Uid {
+			involvedRoom = r
+			break
+		}
+	}
+
+	var numberOfRoomsAfterSomeoneLeft int = len(involvedRoom.Users)
+
+	if w.Code != http.StatusOK {
+		t.Error("Status code is not http.StatusOK")
+	} else if _, ok := r["message"]; !ok {
+		t.Error("There is no message key.")
+	} else if r["message"] != "Successfully left the room." {
+		t.Error("Error message content should be 'Successfull left the room.'")
+	} else if numberOfRoomsAfterSomeoneLeft != numberOfUsersBeforeSomeoneLeft - 1 {
+		t.Error("Supposedly user should be removed.")
+	}
+}
+
 
 
 
