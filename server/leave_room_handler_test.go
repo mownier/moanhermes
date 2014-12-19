@@ -210,6 +210,25 @@ func TestLeaveRoomHandlerIfMemberWantsToLeave(t *testing.T) {
 	}
 }
 
+func TestLeaveRoomHandlerIfResponseContentTypeIsJSON(t *testing.T) {
+	leaveRoomHandler := leaveRoomHandler()
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/leave?username=&room_id=", nil)
+	w := httptest.NewRecorder()
+	leaveRoomHandler.ServeHTTP(w, request)
+	
+	var response interface{}
+	json.Unmarshal(w.Body.Bytes(), &response)
+	r := response.(map[string]interface{})
+
+	if w.Code != http.StatusMethodNotAllowed {
+		t.Error("Status code should be 'http.StatusMethodNotAllowed'.")
+	} else if _, ok := r["message"]; !ok {
+		t.Error("There is no message key.")
+	} else if r["message"] != "Method not allowed." {
+		t.Error("Error message should be 'Method not allowed.'")
+	}
+}
+
 
 
 
