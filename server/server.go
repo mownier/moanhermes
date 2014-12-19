@@ -203,11 +203,13 @@ func leaveRoomHandler() http.HandlerFunc {
 			if hasUsername && hasRoomId {
 				var roomDoesExist bool
 				var room *Room
+				var roomIndex int
 				for i := 0; i < len(rooms); i++ {
 					var r *Room = rooms[i]
 					if r.Uid == roomId {
 						roomDoesExist = true
 						room = r
+						roomIndex = i
 						break
 					}
 				}
@@ -216,12 +218,14 @@ func leaveRoomHandler() http.HandlerFunc {
 					responseString = []byte("{\"message\" : \"Room not found.\"}")
 				} else {
 					var userDoesExist bool
-					// var user *User
+					var user *User
+					var userIndex int
 					for i := 0; i < len(room.Users); i++ {
 						var u *User = room.Users[i]
 						if u.Username == username {
 							userDoesExist = true
-							// user = u
+							user = u
+							userIndex = i
 							break
 						}
 					}
@@ -229,7 +233,17 @@ func leaveRoomHandler() http.HandlerFunc {
 						responseStatusCode = http.StatusNotFound
 						responseString = []byte("{\"message\" : \"User not found in the room.\"}")
 					} else {
-
+						var creator *User = room.Users[0]
+						var isTheCreator bool = creator.Username == user.Username
+						if isTheCreator {
+							// Removing a room in rooms
+							rooms = append(rooms[:roomIndex], rooms[roomIndex + 1:]...)
+						} else {
+							// Removing an user in Users
+							room.Users = append(room.Users[:userIndex], room.Users[userIndex + 1:]...)
+						}
+						responseStatusCode = http.StatusOK
+						responseString = []byte("{\"message\" : \"Successfully left the room.\"}")
 					}
 				}
 			} else {
