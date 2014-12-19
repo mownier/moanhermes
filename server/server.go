@@ -195,7 +195,26 @@ func leaveRoomHandler() http.HandlerFunc {
 			responseStatusCode = http.StatusMethodNotAllowed
 			responseString = []byte("{\"message\" : \"Method not allowed.\"}")
 		} else {
+			var username string = r.FormValue("username")
+			var roomId string = r.FormValue("room_id")
+			var hasUsername bool = len(username) > 0
+			var hasRoomId bool = len(roomId) > 0
+			
+			if hasUsername && hasRoomId {
 
+			} else {
+				errors := make(map[string]interface{})
+				if !hasUsername {
+					errors["username"] = "Username is required."
+				}
+				if !hasRoomId {
+					errors["room_id"] = "Room id is required."
+				}
+				jsonString, _ := json.Marshal(errors)
+
+				responseStatusCode = http.StatusBadRequest
+				responseString = jsonString
+			}
 		}
 
 		w.Header().Set("Content-Type", "applicatin/json")
