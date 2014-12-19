@@ -195,13 +195,43 @@ func leaveRoomHandler() http.HandlerFunc {
 			responseStatusCode = http.StatusMethodNotAllowed
 			responseString = []byte("{\"message\" : \"Method not allowed.\"}")
 		} else {
-			var username string = r.FormValue("username")
-			var roomId string = r.FormValue("room_id")
+			r.ParseForm()
+			var username string = r.URL.Query().Get("username")
+			var roomId string = r.URL.Query().Get("room_id")
 			var hasUsername bool = len(username) > 0
 			var hasRoomId bool = len(roomId) > 0
-			
 			if hasUsername && hasRoomId {
+				var roomDoesExist bool
+				var room *Room
+				for i := 0; i < len(rooms); i++ {
+					var r *Room = rooms[i]
+					if r.Uid == roomId {
+						roomDoesExist = true
+						room = r
+						break
+					}
+				}
+				if !roomDoesExist {
+					responseStatusCode = http.StatusNotFound
+					responseString = []byte("{\"message\" : \"Room not found.\"}")
+				} else {
+					var userDoesExist bool
+					// var user *User
+					for i := 0; i < len(room.Users); i++ {
+						var u *User = room.Users[i]
+						if u.Username == username {
+							userDoesExist = true
+							// user = u
+							break
+						}
+					}
+					if !userDoesExist {
+						responseStatusCode = http.StatusNotFound
+						responseString = []byte("{\"message\" : \"User not found in the room.\"}")
+					} else {
 
+					}
+				}
 			} else {
 				errors := make(map[string]interface{})
 				if !hasUsername {
