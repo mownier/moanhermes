@@ -51,7 +51,7 @@ func broadcastMessage(message, roomUid string) {
 func (m *Moanhermes) StartServing(address string) {
 	http.HandleFunc("/chat/room/create"     , createRoomHandler())
 	http.HandleFunc("/chat/room/join"       , joinRoomHandler())
-	http.HandleFunc("/chat/room/leave"      , leaveRoomHandler)
+	http.HandleFunc("/chat/room/leave"      , leaveRoomHandler())
 	http.HandleFunc("/chat/room/invite"     , inviteRoomHandler)
 	http.HandleFunc("/chat/room/remove"     , removeRoomHandler)
 	http.HandleFunc("/chat/message/compose" , composeMessageHandler)
@@ -184,8 +184,87 @@ func joinRoomHandler() http.HandlerFunc {
 	})
 }
 
-func leaveRoomHandler(w http.ResponseWriter, r *http.Request) {
+// METHOD: DELETE
+// PARAMS: room_id, username
+func leaveRoomHandler() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var responseString []byte
+		var responseStatusCode int
 
+		if r.Method != "DELETE" {
+			responseStatusCode = http.StatusMethodNotAllowed
+			responseString = []byte("{\"message\" : \"Method not allowed.\"}")
+		} else {
+			r.ParseForm()
+			var username string = r.URL.Query().Get("username")
+			var roomId string = r.URL.Query().Get("room_id")
+			var hasUsername bool = len(username) > 0
+			var hasRoomId bool = len(roomId) > 0
+			if hasUsername && hasRoomId {
+				var roomDoesExist bool
+				var room *Room
+				var roomIndex int
+				for i := 0; i < len(rooms); i++ {
+					var r *Room = rooms[i]
+					if r.Uid == roomId {
+						roomDoesExist = true
+						room = r
+						roomIndex = i
+						break
+					}
+				}
+				if !roomDoesExist {
+					responseStatusCode = http.StatusNotFound
+					responseString = []byte("{\"message\" : \"Room not found.\"}")
+				} else {
+					var userDoesExist bool
+					var user *User
+					var userIndex int
+					for i := 0; i < len(room.Users); i++ {
+						var u *User = room.Users[i]
+						if u.Username == username {
+							userDoesExist = true
+							user = u
+							userIndex = i
+							break
+						}
+					}
+					if !userDoesExist {
+						responseStatusCode = http.StatusNotFound
+						responseString = []byte("{\"message\" : \"User not found in the room.\"}")
+					} else {
+						var creator *User = room.Users[0]
+						var isTheCreator bool = creator.Username == user.Username
+						if isTheCreator {
+							// Removing a room in rooms
+							rooms = append(rooms[:roomIndex], rooms[roomIndex + 1:]...)
+						} else {
+							// Removing an user in Users
+							room.Users = append(room.Users[:userIndex], room.Users[userIndex + 1:]...)
+						}
+						responseStatusCode = http.StatusOK
+						responseString = []byte("{\"message\" : \"Successfully left the room.\"}")
+					}
+				}
+			} else {
+				errors := make(map[string]interface{})
+				if !hasUsername {
+					errors["username"] = "Username is required."
+				}
+				if !hasRoomId {
+					errors["room_id"] = "Room id is required."
+				}
+				jsonString, _ := json.Marshal(errors)
+
+				responseStatusCode = http.StatusBadRequest
+				responseString = jsonString
+			}
+		}
+
+		w.Header().Set("Content-Type", "applicatin/json")
+		w.WriteHeader(responseStatusCode)
+		w.Write(responseString)
+	})
 }
 
 func inviteRoomHandler(w http.ResponseWriter, r *http.Request) {
