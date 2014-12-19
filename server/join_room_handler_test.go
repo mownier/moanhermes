@@ -184,8 +184,16 @@ func TestJoinRoomHandlerUserSuccessfullyJoined(t *testing.T) {
 	json.Unmarshal(w.Body.Bytes(), &response)
 	r := response.(map[string]interface{})
 
-	var newJoinedUser *User = room.Users[len(room.Users) - 1]
+	var testRoom *Room
+	for i := 0; i < len(rooms); i++ {
+		var r *Room = rooms[i]
+		if r.Uid == room.Uid {
+			testRoom = r
+			break;
+		}
+	}
 
+	var newJoinedUser *User = testRoom.Users[len(testRoom.Users) - 1]
 	if newJoinedUser.Username != "juan" {
 		t.Error("Newly joined user's username is not 'juan'.")
 	} else if w.Code != http.StatusOK {
