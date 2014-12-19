@@ -4,25 +4,13 @@ import (
 	"testing"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
-	"bytes"
 	"encoding/json"
 )
 
 func TestLeaveRoomHandlerIfNotMethodDELETE(t *testing.T) {
-	var creator *User = NewUser("mownier")
-	var member *User = NewUser("juan")
-	var room *Room = NewRoom("room123", creator)
-	room.Users = append(room.Users, member)
-	rooms = append(rooms, room)
-
 	leaveRoomHandler := leaveRoomHandler()
-	params := url.Values{}
-	params.Add("username", member.Username)
-	params.Add("room_id", room.Uid)
 	// GET, POST, PUT
-	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/leave", bytes.NewBufferString(params.Encode()))
-	request.Header.Set("Content-Type", "application/x-www-urlencoded; param=value")
+	request, _ := http.NewRequest("POST", "localhost:8080/chat/room/leave?username=&room_id=", nil)
 	w := httptest.NewRecorder()
 	leaveRoomHandler.ServeHTTP(w, request)
 	
@@ -41,10 +29,7 @@ func TestLeaveRoomHandlerIfNotMethodDELETE(t *testing.T) {
 
 func TestLeaveRoomHandlerEmptyUsernameParameterValue(t *testing.T) {
 	leaveRoomHandler := leaveRoomHandler()
-	params := url.Values{}
-	params.Add("username", "")
-	request, _ := http.NewRequest("DELETE", "localhost:8080/chat/room/leave", bytes.NewBufferString(params.Encode()))
-	request.Header.Set("Content-Type", "application/x-www-urlencoded; param=value")
+	request, _ := http.NewRequest("DELETE", "localhost:8080/chat/room/leave?room_id=123&username=", nil)
 	w := httptest.NewRecorder()
 	leaveRoomHandler.ServeHTTP(w, request)
 
@@ -63,10 +48,7 @@ func TestLeaveRoomHandlerEmptyUsernameParameterValue(t *testing.T) {
 
 func TestLeaveRoomHandlerEmptyRoomIdParameterValue(t *testing.T) {
 	leaveRoomHandler := leaveRoomHandler()
-	params := url.Values{}
-	params.Add("room_id", "")
-	request, _ := http.NewRequest("DELETE", "localhost:8080/chat/room/leave", bytes.NewBufferString(params.Encode()))
-	request.Header.Set("Content-Type", "application/x-www-urlencoded; param=value")
+	request, _ := http.NewRequest("DELETE", "localhost:8080/chat/room/leave?room_id=&username=mownier", nil)
 	w := httptest.NewRecorder()
 	leaveRoomHandler.ServeHTTP(w, request)
 
@@ -85,9 +67,7 @@ func TestLeaveRoomHandlerEmptyRoomIdParameterValue(t *testing.T) {
 
 func TestLeaveRoomHandlerRoomIdNotSetAsParameter(t *testing.T) {
 	leaveRoomHandler := leaveRoomHandler()
-	params := url.Values{}
-	request, _ := http.NewRequest("DELETE", "localhost:8080/chat/room/leave", bytes.NewBufferString(params.Encode()))
-	request.Header.Set("Content-Type", "application/x-www-urlencoded; param=value")
+	request, _ := http.NewRequest("DELETE", "localhost:8080/chat/room/leave?username=mownier", nil)
 	w := httptest.NewRecorder()
 	leaveRoomHandler.ServeHTTP(w, request)
 
@@ -106,9 +86,8 @@ func TestLeaveRoomHandlerRoomIdNotSetAsParameter(t *testing.T) {
 
 func TestLeaveRoomHandlerUsernameNotSetAsParameter(t *testing.T) {
 	leaveRoomHandler := leaveRoomHandler()
-	params := url.Values{}
-	request, _ := http.NewRequest("DELETE", "localhost:8080/chat/room/leave", bytes.NewBufferString(params.Encode()))
-	request.Header.Set("Content-Type", "application/x-www-urlencoded; param=value")
+	request, _ := http.NewRequest("DELETE", "localhost:8080/chat/room/leave?room_id=123", nil)
+	request.Header.Set("Content-Type", "text/plain; charset=utf-8")
 	w := httptest.NewRecorder()
 	leaveRoomHandler.ServeHTTP(w, request)
 
@@ -124,3 +103,110 @@ func TestLeaveRoomHandlerUsernameNotSetAsParameter(t *testing.T) {
 		t.Error("Error message should be 'Username is required.'")
 	}
 }
+
+func TestLeaveRoomHandlerRoomNotFound(t *testing.T) {
+	leaveRoomHandler := leaveRoomHandler()
+	request, _ := http.NewRequest("DELETE", "localhost:8080/chat/room/leave?username=mownier&room_id=123", nil)
+	w := httptest.NewRecorder()
+	leaveRoomHandler.ServeHTTP(w, request)
+	var response interface{}
+	json.Unmarshal(w.Body.Bytes(), &response)
+	r := response.(map[string]interface{})
+	if w.Code != http.StatusNotFound {
+		t.Error("Status code is not http.StatusNotFound.")
+	} else if _, ok := r["message"]; !ok {
+		t.Error("There is no error message key.")
+	} else if r["message"] != "Room not found." {
+		t.Error("Error message should be 'Room not found.'")
+	}
+}
+
+func TestLeaveRoomHandlerUserNotFoundInRoom(t *testing.T) {
+	var creator *User = NewUser("mownier")
+	var member *User = NewUser("juan")
+	var room *Room = NewRoom("room123", creator)
+	room.Users = append(room.Users, member)
+	rooms = append(rooms, room)
+
+	leaveRoomHandler := leaveRoomHandler()
+	request, _ := http.NewRequest("DELETE", "localhost:8080/chat/room/leave?username=jane&room_id=" + room.Uid, nil)
+	w := httptest.NewRecorder()
+	leaveRoomHandler.ServeHTTP(w, request)
+	var response interface{}
+	json.Unmarshal(w.Body.Bytes(), &response)
+	r := response.(map[string]interface{})
+	if w.Code != http.StatusNotFound {
+		t.Error("Status code is not http.StatusNotFound.")
+	} else if _, ok := r["message"]; !ok {
+		t.Error("There is no message key.")
+	} else if r["message"] != "User not found in the room." {
+		t.Error("Error message should be 'User not found in the room.'")
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
