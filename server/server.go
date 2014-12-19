@@ -51,7 +51,7 @@ func broadcastMessage(message, roomUid string) {
 func (m *Moanhermes) StartServing(address string) {
 	http.HandleFunc("/chat/room/create"     , createRoomHandler())
 	http.HandleFunc("/chat/room/join"       , joinRoomHandler())
-	http.HandleFunc("/chat/room/leave"      , leaveRoomHandler)
+	http.HandleFunc("/chat/room/leave"      , leaveRoomHandler())
 	http.HandleFunc("/chat/room/invite"     , inviteRoomHandler)
 	http.HandleFunc("/chat/room/remove"     , removeRoomHandler)
 	http.HandleFunc("/chat/message/compose" , composeMessageHandler)
@@ -184,8 +184,24 @@ func joinRoomHandler() http.HandlerFunc {
 	})
 }
 
-func leaveRoomHandler(w http.ResponseWriter, r *http.Request) {
+// METHOD: DELETE
+// PARAMS: room_id, username
+func leaveRoomHandler() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var responseString []byte
+		var responseStatusCode int
 
+		if r.Method != "DELETE" {
+			responseStatusCode = http.StatusMethodNotAllowed
+			responseString = []byte("{\"message\" : \"Method not allowed.\"}")
+		} else {
+
+		}
+
+		w.Header().Set("Content-Type", "applicatin/json")
+		w.WriteHeader(responseStatusCode)
+		w.Write(responseString)
+	})
 }
 
 func inviteRoomHandler(w http.ResponseWriter, r *http.Request) {
