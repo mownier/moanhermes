@@ -20,10 +20,23 @@ func NewUser(username string) *User {
 	}
 }
 
+type Message struct {
+	User *User
+	Content string
+}
+
+func NewMessage(user *User, content string) *Message {
+	return &Message {
+		User: user,
+		Content: content,
+	}	
+}
+
 type Room struct {
 	Uid string
 	Name string
 	Users []*User
+	Messages []*Message
 }
 
 func NewRoom(name string, creator *User) *Room {
@@ -264,7 +277,7 @@ func leaveRoomHandler() http.HandlerFunc {
 			}
 		}
 
-		w.Header().Set("Content-Type", "applicatin/json")
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(responseStatusCode)
 		w.Write(responseString)
 	})
@@ -274,6 +287,8 @@ func inviteRoomHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// METHOD : DELETE
+// PARAMS : username, room_id
 func removeRoomHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var responseString []byte
