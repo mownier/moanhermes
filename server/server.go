@@ -56,7 +56,7 @@ func (m *Moanhermes) StartServing(address string) {
 	http.HandleFunc("/chat/room/join"       , joinRoomHandler())
 	http.HandleFunc("/chat/room/leave"      , leaveRoomHandler())
 	http.HandleFunc("/chat/room/invite"     , inviteRoomHandler)
-	http.HandleFunc("/chat/room/remove"     , removeRoomHandler)
+	http.HandleFunc("/chat/room/remove"     , removeRoomHandler())
 	http.HandleFunc("/chat/message/compose" , composeMessageHandler)
 	http.HandleFunc("/chat/message/remove"  , removeMessageHandler)
 	http.HandleFunc("/chat/register"        , registerHandler)
@@ -274,8 +274,66 @@ func inviteRoomHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func removeRoomHandler(w http.ResponseWriter, r *http.Request) {
+func removeRoomHandler() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var responseString []byte
+		var responseStatusCode int
 
+		if r.Method != "DELETE" {
+			responseStatusCode = http.StatusMethodNotAllowed
+			responseString = []byte("{\"message\" : \"Method not allowed.\"}")
+		} else {
+			var username string = r.URL.Query().Get("username")
+			var roomId string = r.URL.Query().Get("room_id")
+			var hasUsername bool = len(username) > 0
+			var hasRoomId bool = len(roomId) > 0
+
+			if hasUsername && hasRoomId {
+				var roomDoesExist bool
+				var room *Room
+				var roomIndex int
+				for i := 0; i < len(rooms); i++ {
+					var r *Room = rooms[i]
+					if r.Uid == roomId {
+						room = r
+						roomDoesExist = true
+						roomIndex = i
+						break
+					}
+				}
+				if !roomDoesExist {
+					responseStatusCode = http.StatusNotFound
+					responseString = []byte("{\"message\" : \"Room not found.\"}")
+				} else {
+					var creator *User = room.Users[0]
+					var isTheCreator bool = username == creator.Username
+					if !isTheCreator {
+						responseStatusCode = http.StatusUnauthorized
+						responseString = []byte("{\"message\" : \"Unauthorized to remove the room.\"}")
+					} else {
+						rooms = append(rooms[:roomIndex], rooms[roomIndex + 1:]...)
+						responseStatusCode = http.StatusOK
+						responseString = []byte("{\"message\" : \"Successfully removed the room.\"}")
+					}
+				}
+			} else {
+				errors := make(map[string]interface{})
+				if !hasUsername {
+					errors["username"] = "Username is required."
+				}
+				if !hasRoomId {
+					errors["room_id"] = "Room id is required."
+				}
+				jsonString, _ := json.Marshal(errors)
+				responseString = jsonString
+				responseStatusCode = http.StatusBadRequest
+			}
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(responseStatusCode)
+		w.Write(responseString)
+	})
 }
 
 func composeMessageHandler(w http.ResponseWriter, r *http.Request) {
