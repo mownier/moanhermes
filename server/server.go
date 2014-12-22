@@ -23,12 +23,14 @@ func NewUser(username string) *User {
 type Message struct {
 	User *User
 	Content string
+	DatePosted time.Time
 }
 
 func NewMessage(user *User, content string) *Message {
 	return &Message {
 		User: user,
 		Content: content,
+		DatePosted: time.Now(),
 	}	
 }
 
