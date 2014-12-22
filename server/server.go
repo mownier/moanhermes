@@ -77,7 +77,7 @@ func (m *Moanhermes) StartServing(address string) {
 	http.HandleFunc("/chat/message/compose" , composeMessageHandler)
 	http.HandleFunc("/chat/message/remove"  , removeMessageHandler)
 	http.HandleFunc("/chat/register"        , registerHandler())
-	http.HandleFunc("/chat/signin"          , signinHandler)
+	http.HandleFunc("/chat/signin"          , signinHandler())
 	http.HandleFunc("/chat/signout"         , signoutHandler)
 	log.Fatal(http.ListenAndServe(address, nil))
 }
@@ -411,8 +411,49 @@ func registerHandler() http.HandlerFunc {
 	})
 }
 
-func signinHandler(w http.ResponseWriter, r *http.Request) {
-	
+func signinHandler() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var responseString []byte
+		var responseStatusCode int
+
+		if r.Method != "POST" {
+			responseStatusCode = http.StatusMethodNotAllowed
+			responseString = []byte("{\"message\" :\"Method not allowed.\"}")
+		} else {
+			var username string = r.FormValue("username")
+			var hasUsername bool = len(username) > 0
+			if hasUsername {
+				var userDoesExist bool
+				var user *User
+				for i := 0; i < len(users); i++ {
+					var u *User = users[i]
+					if u.Username == username {
+						userDoesExist = true
+						user = u
+						break
+					}
+				}
+				if !userDoesExist {
+					responseStatusCode = http.StatusNotFound
+					responseString = []byte("{\"message\" : \"User does not exist.\"}")
+				} else {
+					user.Online = true
+					responseStatusCode = http.StatusOK
+					responseString = []byte("{\"message\" : \"Successfully signed in.\"}")
+				}
+			} else {
+				errors := make(map[string]interface{})
+				errors["username"] = "Username is required."
+				jsonString, _ := json.Marshal(errors)
+				responseString = jsonString
+				responseStatusCode = http.StatusBadRequest
+			}
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(responseStatusCode)
+		w.Write(responseString)
+	})
 }
 
 func signoutHandler(w http.ResponseWriter, r *http.Request) {
