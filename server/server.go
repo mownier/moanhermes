@@ -12,6 +12,7 @@ import (
 
 type User struct {
 	Username string
+	Online bool
 }
 
 func NewUser(username string) *User {
@@ -57,6 +58,7 @@ func NewRoom(name string, creator *User) *Room {
 }
 
 var rooms = make([]*Room, 0)
+var users = make([]*User, 0)
 
 type Moanhermes struct {
 
@@ -74,7 +76,7 @@ func (m *Moanhermes) StartServing(address string) {
 	http.HandleFunc("/chat/room/remove"     , removeRoomHandler())
 	http.HandleFunc("/chat/message/compose" , composeMessageHandler)
 	http.HandleFunc("/chat/message/remove"  , removeMessageHandler)
-	http.HandleFunc("/chat/register"        , registerHandler)
+	http.HandleFunc("/chat/register"        , registerHandler())
 	http.HandleFunc("/chat/signin"          , signinHandler)
 	http.HandleFunc("/chat/signout"         , signoutHandler)
 	log.Fatal(http.ListenAndServe(address, nil))
@@ -361,8 +363,52 @@ func removeMessageHandler(w http.ResponseWriter, r *http.Request) {
 	
 }
 
-func registerHandler(w http.ResponseWriter, r *http.Request) {
+// METHOD : POST
+// PARAMS : username
+func registerHandler() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var responseString []byte
+		var responseStatusCode int
 
+		if r.Method != "POST" {
+			responseStatusCode = http.StatusMethodNotAllowed
+			responseString = []byte("{\"message\" : \"Method not allowed.\"}")
+		} else {
+			var username string = r.FormValue("username")
+			var hasUsername bool = len(username) > 0
+
+			if !hasUsername {
+				errors := make(map[string]interface{})
+				errors["username"] = "Username is required."
+				responseStatusCode = http.StatusBadRequest
+				responseString = []byte("{\"username\" : \"Username is required.\"}")
+			} else {
+				var userDoesExist bool
+				// var userIndex int
+				for i := 0; i < len(users); i++ {
+					var u *User = users[i]
+					if u.Username == username {
+						// userIndex = i
+						userDoesExist = true
+						break
+					}
+				}
+				if userDoesExist {
+					responseStatusCode = http.StatusBadRequest
+					responseString = []byte("{\"message\" : \"Username already exists.\"}")
+				} else {
+					var newUser *User = NewUser(username)
+					users = append(users, newUser)
+					responseStatusCode = http.StatusOK
+					responseString = []byte("{\"message\" :\"Successfully registered.\"}")
+				}
+			}
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(responseStatusCode)
+		w.Write(responseString)
+	})
 }
 
 func signinHandler(w http.ResponseWriter, r *http.Request) {
