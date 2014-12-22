@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"crypto/sha1"
 	"encoding/base64"
+	"strconv"
+	"time"
 )
 
 type User struct {
@@ -26,7 +28,8 @@ type Room struct {
 
 func NewRoom(name string, creator *User) *Room {
 	hasher := sha1.New()
-	hasher.Write([]byte(name))
+	timestamp := strconv.Itoa(int(time.Now().UnixNano()))
+	hasher.Write([]byte(name + timestamp))
 	uid := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 	users := make([]*User, 0)
 	users = append(users, creator)
@@ -212,7 +215,7 @@ func leaveRoomHandler() http.HandlerFunc {
 						roomIndex = i
 						break
 					}
-				}
+				} 
 				if !roomDoesExist {
 					responseStatusCode = http.StatusNotFound
 					responseString = []byte("{\"message\" : \"Room not found.\"}")
