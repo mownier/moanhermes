@@ -78,7 +78,7 @@ func (m *Moanhermes) StartServing(address string) {
 	http.HandleFunc("/chat/message/remove"  , removeMessageHandler)
 	http.HandleFunc("/chat/register"        , registerHandler())
 	http.HandleFunc("/chat/signin"          , signinHandler())
-	http.HandleFunc("/chat/signout"         , signoutHandler)
+	http.HandleFunc("/chat/signout"         , signoutHandler())
 	log.Fatal(http.ListenAndServe(address, nil))
 }
 
@@ -456,7 +456,10 @@ func signinHandler() http.HandlerFunc {
 	})
 }
 
-func signoutHandler(w http.ResponseWriter, r *http.Request) {
+func signoutHandler() http.HandlerFunc {
+	return http.HandlerFucn(func(w http.ResponseWriter, r *http.Request) {
+
+	})
 
 }
 
