@@ -457,7 +457,7 @@ func signinHandler() http.HandlerFunc {
 }
 
 func signoutHandler() http.HandlerFunc {
-	return http.HandlerFucn(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 	})
 
