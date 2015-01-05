@@ -18,6 +18,7 @@ type User struct {
 func NewUser(username string) *User {
 	return &User {
 		Username: username,
+		Online: false,
 	}
 }
 
@@ -78,7 +79,7 @@ func (m *Moanhermes) StartServing(address string) {
 	http.HandleFunc("/chat/message/remove"  , removeMessageHandler)
 	http.HandleFunc("/chat/register"        , registerHandler())
 	http.HandleFunc("/chat/signin"          , signinHandler())
-	http.HandleFunc("/chat/signout"         , signoutHandler)
+	http.HandleFunc("/chat/signout"         , signoutHandler())
 	log.Fatal(http.ListenAndServe(address, nil))
 }
 
@@ -411,6 +412,8 @@ func registerHandler() http.HandlerFunc {
 	})
 }
 
+// METHOD: POST
+// PARAMS: username
 func signinHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var responseString []byte
@@ -456,7 +459,49 @@ func signinHandler() http.HandlerFunc {
 	})
 }
 
-func signoutHandler(w http.ResponseWriter, r *http.Request) {
+// METHOD: POST
+// PARAMS: username
+func signoutHandler() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var responseStatusCode int
+		var responseString []byte
+
+		if r.Method != "POST" {
+			responseStatusCode = http.StatusMethodNotAllowed
+			responseString = []byte("{\"message\" : \"Method not allowed.\"}")
+		} else {
+			var username string = r.FormValue("username")
+			var hasUsername bool = len(username) > 0
+			if !hasUsername {
+				responseStatusCode = http.StatusBadRequest
+				responseString = []byte("{\"username\" : \"Username is required.\"}")
+			} else {
+				var usernameDoesExist bool
+				var user *User
+				for i := 0; i < len(users); i++ {
+					var u *User = users[i]
+					if u.Username == username {
+						user = u
+						usernameDoesExist = true
+						break
+					}
+				}
+
+				if !usernameDoesExist {
+					responseStatusCode = http.StatusNotFound
+					responseString = []byte("{\"message\" : \"Username not found.\"}")
+				} else  {
+					user.Online = false
+					responseStatusCode = http.StatusOK
+					responseString = []byte("{\"message\" : \"Signed out successfully.\"}")
+				}
+			}
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(responseStatusCode)
+		w.Write(responseString)
+	})
 
 }
 
